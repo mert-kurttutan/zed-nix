@@ -45,7 +45,8 @@ nix build
 
 ## Attribution
 
-Zed is developed by Zed Industries. Nix and NixOS are part of the Nix ecosystem.
+- Zed is developed by Zed Industries.
+- Nix and NixOS are part of the Nix ecosystem.
 
 ## Contributing
 

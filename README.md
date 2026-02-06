@@ -28,14 +28,6 @@ This flake provides prebuilt Zed editor releases so you can use newer versions w
 }
 ```
 
-## Attribution
-
-Zed is developed by Zed Industries. Nix and NixOS are part of the Nix ecosystem.
-
-## Contributing
-
-Contributions are welcome. Please review your changes before submitting.
-
 ## Development
 
 ```
@@ -50,3 +42,11 @@ nix build
 ./result/bin/zed --version
 
 ```
+
+## Attribution
+
+Zed is developed by Zed Industries. Nix and NixOS are part of the Nix ecosystem.
+
+## Contributing
+
+Contributions are welcome. Please review your changes before submitting.

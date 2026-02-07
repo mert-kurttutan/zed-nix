@@ -77,6 +77,8 @@ stdenv.mkDerivation {
       }
 
     mkdir -p "$out/share/applications"
+    install -Dm644 ${./assets/app-icon-nightly.png} \
+      "$out/share/icons/hicolor/256x256/apps/zed.png"
     cat > "$out/share/applications/zed.desktop" <<'EOF'
     [Desktop Entry]
     Version=1.0
@@ -86,6 +88,7 @@ stdenv.mkDerivation {
     Comment=A high-performance, multiplayer code editor.
     TryExec=zed
     Exec=zed %U
+    Icon=zed
     Categories=Utility;TextEditor;Development;IDE;
     Keywords=zed;
     # To add Zed to "Open Folder With..." context menu, add `inode/directory` to the MimeType field (semicolon separated)

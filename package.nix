@@ -3,9 +3,15 @@
 , fetchurl
 , autoPatchelfHook
 , alsa-lib
+, fontconfig
 , gnutar
 , gzip
+, libxkbcommon
 , makeWrapper
+, openssl
+, vulkan-loader
+, wayland
+, xorg
 }:
 
 let
@@ -30,7 +36,14 @@ stdenv.mkDerivation {
   ];
   buildInputs = [
     alsa-lib
+    fontconfig
+    libxkbcommon
+    openssl
     stdenv.cc.cc
+    vulkan-loader
+    wayland
+    xorg.libX11
+    xorg.libxcb
   ];
 
   buildPhase = ''
@@ -51,7 +64,14 @@ stdenv.mkDerivation {
       exit 1
     fi
 
-    ln -s "$zed_bin" $out/bin/zed
+    makeWrapper "$zed_bin" "$out/bin/zed" \
+      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [
+        vulkan-loader
+        wayland
+        libxkbcommon
+        xorg.libX11
+        xorg.libxcb
+      ]}
     runHook postInstall
   '';
 

@@ -81,13 +81,11 @@ stdenv.mkDerivation {
     [Desktop Entry]
     Version=1.0
     Type=Application
-    Name=$APP_NAME
+    Name=Zed
     GenericName=Text Editor
     Comment=A high-performance, multiplayer code editor.
-    TryExec=$APP_CLI
-    StartupNotify=$DO_STARTUP_NOTIFY
-    Exec=$APP_CLI $APP_ARGS
-    Icon=$APP_ICON
+    TryExec=zed
+    Exec=zed %U
     Categories=Utility;TextEditor;Development;IDE;
     Keywords=zed;
     # To add Zed to "Open Folder With..." context menu, add `inode/directory` to the MimeType field (semicolon separated)
@@ -97,7 +95,7 @@ stdenv.mkDerivation {
     Actions=NewWorkspace;
 
     [Desktop Action NewWorkspace]
-    Exec=$APP_CLI --new $APP_ARGS
+    Exec=zed --new %U
     Name=Open a new workspace
 
     runHook postInstall

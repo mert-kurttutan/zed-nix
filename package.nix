@@ -8,11 +8,12 @@
   gnutar,
   gzip,
   libxkbcommon,
+  libx11,
+  libxcb,
   makeWrapper,
   openssl,
   vulkan-loader,
   wayland,
-  xorg,
 }:
 
 let
@@ -43,8 +44,8 @@ stdenv.mkDerivation {
     stdenv.cc.cc
     vulkan-loader
     wayland
-    xorg.libX11
-    xorg.libxcb
+    libx11
+    libxcb
   ];
 
   buildPhase = ''
@@ -71,8 +72,8 @@ stdenv.mkDerivation {
           vulkan-loader
           wayland
           libxkbcommon
-          xorg.libX11
-          xorg.libxcb
+          libx11
+          libxcb
         ]
       }
 

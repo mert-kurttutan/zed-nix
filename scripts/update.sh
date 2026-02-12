@@ -30,7 +30,7 @@ get_latest_version() {
 
 fetch_tarball_hash() {
     local version="$1"
-    local url="${GITHUB_RELEASE_BASE}/v${version}/${ASSET_NAME}"
+    local url="${GITHUB_RELEASE_BASE}/${version}/${ASSET_NAME}"
 
     local hash
     hash=$(nix-prefetch-url "$url" 2>/dev/null | tail -1)

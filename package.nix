@@ -101,6 +101,7 @@ stdenv.mkDerivation {
     [Desktop Action NewWorkspace]
     Exec=zed --new %U
     Name=Open a new workspace
+EOF
 
     runHook postInstall
   '';

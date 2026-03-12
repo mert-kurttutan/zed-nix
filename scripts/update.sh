@@ -15,7 +15,7 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 get_current_version() {
-    sed -n 's/.*version = "\([^"]*\)".*/\1/p' package.nix | head -1 || echo "unknown"
+    sed -n 's/.*version = "\([^"]*\)".*/\1/p' package.nix | head -1 | sed 's/^v//' || echo "unknown"
 }
 
 get_latest_version() {
@@ -30,7 +30,7 @@ get_latest_version() {
 
 fetch_tarball_hash() {
     local version="$1"
-    local url="${GITHUB_RELEASE_BASE}/${version}/${ASSET_NAME}"
+    local url="${GITHUB_RELEASE_BASE}/v${version}/${ASSET_NAME}"
 
     local hash
     hash=$(nix-prefetch-url "$url" 2>/dev/null | tail -1)
@@ -140,7 +140,7 @@ parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             --version)
-                target_version="$2"
+                target_version="${2#v}"
                 shift 2
                 ;;
             --check)
@@ -189,10 +189,10 @@ main() {
     local current_version
     current_version=$(get_current_version)
     local latest_version
-    latest_version=$(get_latest_version)
-
     if [ -n "$target_version" ]; then
         latest_version="$target_version"
+    else
+        latest_version=$(get_latest_version)
     fi
 
     log_info "Current version: $current_version"

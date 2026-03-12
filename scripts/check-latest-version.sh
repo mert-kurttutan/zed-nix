@@ -17,6 +17,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --version)
       VERSION_ARG="${2:-}"
+      VERSION_ARG="${VERSION_ARG#v}"
       shift 2
       ;;
     -h|--help)
@@ -31,7 +32,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-CURRENT_VERSION=$(grep 'version = ' package.nix | cut -d'"' -f2 | head -1)
+CURRENT_VERSION=$(grep 'version = ' package.nix | cut -d'"' -f2 | head -1 | sed 's/^v//')
 
 if [[ -n "$VERSION_ARG" ]]; then
   LATEST_VERSION="$VERSION_ARG"
@@ -40,7 +41,7 @@ else
     echo "Missing required command: gh" >&2
     exit 1
   fi
-  LATEST_VERSION=$(gh release view --repo zed-industries/zed --json tagName -q '.tagName' | sed 's/^rust-v//' || echo "")
+  LATEST_VERSION=$(gh release view --repo zed-industries/zed --json tagName -q '.tagName' | sed 's/^v//' || echo "")
 fi
 
 if [[ -z "$LATEST_VERSION" ]]; then

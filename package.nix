@@ -81,26 +81,26 @@ stdenv.mkDerivation {
     install -Dm644 ${./assets/app-icon-nightly.png} \
       "$out/share/icons/hicolor/256x256/apps/zed.png"
     cat > "$out/share/applications/zed.desktop" <<'EOF'
-    [Desktop Entry]
-    Version=1.0
-    Type=Application
-    Name=Zed
-    GenericName=Text Editor
-    Comment=A high-performance, multiplayer code editor.
-    TryExec=zed
-    Exec=zed %U
-    Icon=zed
-    Categories=Utility;TextEditor;Development;IDE;
-    Keywords=zed;
-    # To add Zed to "Open Folder With..." context menu, add `inode/directory` to the MimeType field (semicolon separated)
-    # Arch linux users have reported this setting Zed as default file browser. See https://github.com/zed-industries/zed/pull/39076 and related issues.
-    # If this happens to you, an unconfirmed fix may be to install Arch's `gnome-defaults-list` package.
-    MimeType=text/plain;application/x-zerosize;x-scheme-handler/zed;
-    Actions=NewWorkspace;
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zed
+GenericName=Text Editor
+Comment=A high-performance, multiplayer code editor.
+TryExec=zed
+Exec=zed %U
+Icon=zed
+Categories=Utility;TextEditor;Development;IDE;
+Keywords=zed;
+# To add Zed to "Open Folder With..." context menu, add `inode/directory` to the MimeType field (semicolon separated)
+# Arch linux users have reported this setting Zed as default file browser. See https://github.com/zed-industries/zed/pull/39076 and related issues.
+# If this happens to you, an unconfirmed fix may be to install Arch's `gnome-defaults-list` package.
+MimeType=text/plain;application/x-zerosize;x-scheme-handler/zed;
+Actions=NewWorkspace;
 
-    [Desktop Action NewWorkspace]
-    Exec=zed --new %U
-    Name=Open a new workspace
+[Desktop Action NewWorkspace]
+Exec=zed --new %U
+Name=Open a new workspace
 EOF
 
     runHook postInstall

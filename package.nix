@@ -17,10 +17,10 @@
 }:
 
 let
-  version = "1.1.5";
+  version = "1.1.6";
   src = fetchurl {
     url = "https://github.com/zed-industries/zed/releases/download/v${version}/zed-linux-x86_64.tar.gz";
-    sha256 = "sha256-qWcZU3dNlA+wldMl7cXLJu9xKJqYRnYu25YQpWmyJEY=";
+    sha256 = "sha256-paIFaChMgtYS4s3ehwSkscxtvCZNsBsL/AXF0F232xE=";
   };
 
 in

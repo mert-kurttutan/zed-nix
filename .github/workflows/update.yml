@@ -16,10 +16,23 @@ permissions:
 jobs:
   check-update:
     runs-on: ubuntu-latest
+    env:
+      NU_VERSION: "0.114.1"
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nushell
+        run: |
+          set -euo pipefail
+          asset="nu-${NU_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          url="https://github.com/nushell/nushell/releases/download/${NU_VERSION}/${asset}"
+          mkdir -p "$RUNNER_TEMP/nu" "$RUNNER_TOOL_CACHE/nu/bin"
+          curl --fail --location --show-error --silent "$url" --output "$RUNNER_TEMP/nu/$asset"
+          tar -xzf "$RUNNER_TEMP/nu/$asset" -C "$RUNNER_TEMP/nu"
+          find "$RUNNER_TEMP/nu" -type f -name nu -perm -u+x -exec cp {} "$RUNNER_TOOL_CACHE/nu/bin/nu" \; -quit
+          echo "$RUNNER_TOOL_CACHE/nu/bin" >> "$GITHUB_PATH"
 
       - uses: cachix/install-nix-action@v27
         with:
@@ -31,20 +44,23 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REQUESTED_VERSION: ${{ github.event.inputs.version }}
+        shell: nu {0}
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            ./scripts/check-latest-version.sh --version "${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            ./scripts/check-latest-version.sh >> $GITHUB_OUTPUT
-          fi
+          if ($env.REQUESTED_VERSION | is-not-empty) {
+            ./scripts/check-latest-version.nu --version $env.REQUESTED_VERSION | save --append $env.GITHUB_OUTPUT
+          } else {
+            ./scripts/check-latest-version.nu | save --append $env.GITHUB_OUTPUT
+          }
 
       - name: Update version
         if: steps.check.outputs.update_needed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.check.outputs.new_version }}
+        shell: nu {0}
         run: |
-          NEW_VERSION="${{ steps.check.outputs.new_version }}"
-          ./scripts/update.sh --version "$NEW_VERSION"
+          ./scripts/update.nu --version $env.NEW_VERSION
 
       - name: Create Pull Request
         if: steps.check.outputs.update_needed == 'true'
@@ -61,8 +77,7 @@ jobs:
 
             ### Changes
             - Updated `version` in `package.nix`
-            - Updated native binary hashes for all platforms
-            - Updated npm tarball hash
+            - Updated the prebuilt Zed tarball hash
 
             ### Checklist
             - [ ] Build passes
@@ -80,23 +95,38 @@ jobs:
         if: steps.check.outputs.update_needed == 'true' && steps.create-pr.outputs.pull-request-number
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: nu {0}
         run: |
           gh pr merge ${{ steps.create-pr.outputs.pull-request-number }} --auto --squash --delete-branch
 
       - name: Summary
         if: always()
+        shell: nu {0}
         run: |
-          echo "## Update Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          def append-summary [lines: list<string>] {
+            let text = ($lines | str join "\n")
+            ($text + "\n") | save --append $env.GITHUB_STEP_SUMMARY
+          }
 
-          if [ "${{ steps.check.outputs.update_needed }}" == "true" ]; then
-            echo "- **Current Version:** ${{ steps.check.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
-            echo "- **Latest Version:** ${{ steps.check.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ Pull request created for version update with auto-merge enabled!" >> $GITHUB_STEP_SUMMARY
-          else
-            CURRENT_VERSION=$(grep 'version = ' package.nix | cut -d'"' -f2 | head -1)
-            echo "- **Current Version:** $CURRENT_VERSION" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ Already up to date!" >> $GITHUB_STEP_SUMMARY
-          fi
+          append-summary ["## Update Summary" ""]
+
+          if "${{ steps.check.outputs.update_needed }}" == "true" {
+            append-summary [
+              "- **Current Version:** ${{ steps.check.outputs.current_version }}"
+              "- **Latest Version:** ${{ steps.check.outputs.new_version }}"
+              ""
+              "Pull request created for version update with auto-merge enabled."
+            ]
+          } else {
+            let current_version = (
+              open --raw package.nix
+              | parse --regex 'version = "(?P<version>[^"]+)"'
+              | get version
+              | first
+            )
+            append-summary [
+              $"- **Current Version:** ($current_version)"
+              ""
+              "Already up to date."
+            ]
+          }

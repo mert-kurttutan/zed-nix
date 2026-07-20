@@ -41,6 +41,12 @@ nix build
 # Test the build
 ./result/bin/zed --version
 
+# Check for upstream updates
+nu scripts/check-latest-version.nu --version VERSION
+
+# Update package metadata
+nu scripts/update.nu --version VERSION
+
 ```
 
 ## Attribution

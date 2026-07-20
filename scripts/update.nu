@@ -1,21 +1,12 @@
 #!/usr/bin/env nu
 
-const GITHUB_REPO = "zed-industries/zed"
+use utils.nu [GITHUB_REPO get-current-version get-latest-version require-command strip-v]
+
 const GITHUB_RELEASE_BASE = $"https://github.com/($GITHUB_REPO)/releases/download"
 const ASSET_NAME = "zed-linux-x86_64.tar.gz"
 
 def log-info [message: string] {
   print $"(ansi green)[INFO](ansi reset) ($message)"
-}
-
-def strip-v [version: string] {
-  $version | str trim | str replace -r '^v' ''
-}
-
-def require-command [name: string] {
-  if (which $name | is-empty) {
-    error make $"($name) is required but not installed."
-  }
 }
 
 def ensure-in-repository-root [] {
@@ -28,29 +19,6 @@ def ensure-required-tools-installed [] {
   require-command nix
   require-command nix-prefetch-url
   require-command gh
-}
-
-def get-current-version [] {
-  let versions = (
-    open --raw package.nix
-    | parse --regex 'version = "(?P<version>[^"]+)"'
-    | get version
-  )
-
-  if ($versions | is-empty) {
-    "unknown"
-  } else {
-    strip-v ($versions | first)
-  }
-}
-
-def get-latest-version [] {
-  let result = (^gh release view --repo $GITHUB_REPO --json tagName -q '.tagName' | complete)
-  if $result.exit_code != 0 {
-    error make "Failed to fetch latest version from GitHub"
-  }
-
-  strip-v $result.stdout
 }
 
 def fetch-tarball-hash [version: string] {

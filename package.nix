@@ -18,9 +18,20 @@
 
 let
   version = "1.15.1";
+  sources = {
+    aarch64-linux = {
+      asset = "zed-linux-aarch64.tar.gz";
+      hash = "sha256-vWGGE1zX+QnItIfony2h0L4ODIzr0742pwe5gjGUdJo=";
+    };
+    x86_64-linux = {
+      asset = "zed-linux-x86_64.tar.gz";
+      hash = "sha256-uaiggOcHSHERQ2ZlJwoMlhshoGuG8ZQ3WgyUAGfLGhc=";
+    };
+  };
+  source = sources.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
   src = fetchurl {
-    url = "https://github.com/zed-industries/zed/releases/download/v${version}/zed-linux-x86_64.tar.gz";
-    sha256 = "sha256-uaiggOcHSHERQ2ZlJwoMlhshoGuG8ZQ3WgyUAGfLGhc=";
+    url = "https://github.com/zed-industries/zed/releases/download/v${version}/${source.asset}";
+    hash = source.hash;
   };
 
 in
@@ -110,7 +121,7 @@ EOF
     description = "Zed editor (prebuilt binary)";
     homepage = "https://zed.dev";
     license = licenses.unfreeRedistributable;
-    platforms = [ "x86_64-linux" ];
+    platforms = builtins.attrNames sources;
     mainProgram = "zed";
   };
 }

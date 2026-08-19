@@ -3,7 +3,10 @@
 use utils.nu [GITHUB_REPO get-current-version get-latest-version require-command strip-v]
 
 const GITHUB_RELEASE_BASE = $"https://github.com/($GITHUB_REPO)/releases/download"
-const ASSET_NAME = "zed-linux-x86_64.tar.gz"
+const LINUX_ARCHES = [
+  x86_64
+  aarch64
+]
 
 def log-info [message: string] {
   print $"(ansi green)[INFO](ansi reset) ($message)"
@@ -21,8 +24,8 @@ def ensure-required-tools-installed [] {
   require-command gh
 }
 
-def fetch-tarball-hash [version: string] {
-  let url = $"($GITHUB_RELEASE_BASE)/v($version)/($ASSET_NAME)"
+def fetch-tarball-hash [version: string, arch: string] {
+  let url = $"($GITHUB_RELEASE_BASE)/v($version)/zed-linux-($arch).tar.gz"
   let result = (^nix-prefetch-url $url | complete)
 
   if $result.exit_code != 0 {
@@ -51,8 +54,15 @@ def set-package-version [content: string, version: string] {
   $content | str replace -r 'version = "[^"]*"' $"version = \"($version)\""
 }
 
-def set-tarball-hash [content: string, sri_hash: string] {
-  $content | str replace -r 'sha256 = "[^"]*"' $"sha256 = \"($sri_hash)\""
+def set-tarball-hash [content: string, arch: string, sri_hash: string] {
+  let asset_line = $"asset = \"zed-linux-($arch).tar.gz\";"
+  let parts = $content | split row $asset_line
+  if (($parts | length) != 2) {
+    error make $"Could not find source for ($arch)"
+  }
+
+  let updated_tail = ($parts | get 1) | str replace -r 'hash = "[^"]*"' $"hash = \"($sri_hash)\""
+  [($parts | get 0), $asset_line, $updated_tail] | str join ""
 }
 
 def update-to-version [new_version: string] {
@@ -62,21 +72,24 @@ def update-to-version [new_version: string] {
   let version_updated = set-package-version $original_package $new_version
   $version_updated | save --force package.nix
 
-  log-info "Fetching tarball hash..."
-  let base32_hash = fetch-tarball-hash $new_version
-  if ($base32_hash | is-empty) {
-    $original_package | save --force package.nix
-    error make "Failed to fetch tarball hash"
-  }
+  mut hash_updated = $version_updated
+  for arch in $LINUX_ARCHES {
+    log-info $"Fetching ($arch) tarball hash..."
+    let base32_hash = fetch-tarball-hash $new_version $arch
+    if ($base32_hash | is-empty) {
+      $original_package | save --force package.nix
+      error make $"Failed to fetch ($arch) tarball hash"
+    }
 
-  let sri_hash = hash-to-sri $base32_hash
-  if ($sri_hash | is-empty) {
-    $original_package | save --force package.nix
-    error make "Failed to convert hash to SRI"
-  }
+    let sri_hash = hash-to-sri $base32_hash
+    if ($sri_hash | is-empty) {
+      $original_package | save --force package.nix
+      error make $"Failed to convert ($arch) hash to SRI"
+    }
 
-  log-info $"Tarball hash: ($sri_hash)"
-  let hash_updated = set-tarball-hash $version_updated $sri_hash
+    log-info $"($arch) tarball hash: ($sri_hash)"
+    $hash_updated = set-tarball-hash $hash_updated $arch $sri_hash
+  }
   $hash_updated | save --force package.nix
 
   log-info "Verifying build..."

@@ -15,7 +15,7 @@ This flake provides prebuilt Zed editor releases so you can use newer versions w
 
   outputs = { self, nixpkgs, zed-nix }:
     let
-      system = "x86_64-linux"; # or your system
+      system = "x86_64-linux"; # or "aarch64-linux"
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {

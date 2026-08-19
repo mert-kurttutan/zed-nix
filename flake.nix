@@ -8,41 +8,46 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     let
+      supportedSystems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
       overlay = final: prev: {
-        zed = final.callPackage ./package.nix {};
+        zed = final.callPackage ./package.nix { };
       };
     in
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays = [ overlay ];
-        };
-      in
-      {
-        packages = {
-          default = pkgs.zed;
-          zed = pkgs.zed;
-        };
-
-        apps = {
-          default = {
-            type = "app";
-            program = "${pkgs.zed}/bin/zed";
+    flake-utils.lib.eachSystem supportedSystems
+      (system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+            overlays = [ overlay ];
           };
-          zed = {
-            type = "app";
-            program = "${pkgs.zed}/bin/zed";
+        in
+        {
+          packages = {
+            default = pkgs.zed;
+            zed = pkgs.zed;
           };
-        };
 
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            nixpkgs-fmt
-          ];
-        };
-      }) // {
-        overlays.default = overlay;
-      };
+          apps = {
+            default = {
+              type = "app";
+              program = "${pkgs.zed}/bin/zed";
+            };
+            zed = {
+              type = "app";
+              program = "${pkgs.zed}/bin/zed";
+            };
+          };
+
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [
+              nixpkgs-fmt
+            ];
+          };
+        }) // {
+      overlays.default = overlay;
+    };
 }

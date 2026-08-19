@@ -30,6 +30,23 @@ This flake provides prebuilt Zed editor releases so you can use newer versions w
 
 ## Development
 
+### Development dependencies
+
+The development shell includes:
+
+- `nixpkgs-fmt` for formatting Nix files.
+
+Enter the shell with:
+
+```sh
+nix develop
+```
+
+The update scripts are written for `nushell`; install `nu` through your system
+configuration before running them.
+
+### Workflow
+
 ```
 # Clone the repository
 git clone https://github.com/mert-kurttutan/zed-nix

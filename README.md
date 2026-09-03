@@ -47,7 +47,7 @@ configuration before running them.
 
 ### Workflow
 
-```
+```SH
 # Clone the repository
 git clone https://github.com/mert-kurttutan/zed-nix
 cd zed-nix

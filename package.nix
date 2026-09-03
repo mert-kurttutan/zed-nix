@@ -5,6 +5,7 @@
   autoPatchelfHook,
   alsa-lib,
   fontconfig,
+  glib,
   gnutar,
   gzip,
   libxkbcommon,
@@ -50,6 +51,7 @@ stdenv.mkDerivation {
   buildInputs = [
     alsa-lib
     fontconfig
+    glib
     libxkbcommon
     openssl
     stdenv.cc.cc
@@ -82,6 +84,7 @@ stdenv.mkDerivation {
         lib.makeLibraryPath [
           vulkan-loader
           wayland
+          glib
           libxkbcommon
           libx11
           libxcb

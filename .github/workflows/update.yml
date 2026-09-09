@@ -60,6 +60,7 @@ jobs:
           NEW_VERSION: ${{ steps.check.outputs.new_version }}
         shell: nu {0}
         run: |
+          ./scripts/repack-release.nu --version $env.NEW_VERSION
           ./scripts/update.nu --version $env.NEW_VERSION
 
       - name: Create Pull Request

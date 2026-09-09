@@ -25,7 +25,7 @@ def ensure-required-tools-installed [] {
 }
 
 def fetch-tarball-hash [version: string, arch: string] {
-  let url = $"($GITHUB_RELEASE_BASE)/v($version)/zed-linux-($arch).tar.gz"
+  let url = $"https://github.com/mert-kurttutan/zed-nix/releases/download/v($version)/zed-linux-($arch).tar.zst"
   let result = (^nix-prefetch-url $url | complete)
 
   if $result.exit_code != 0 {
@@ -55,7 +55,7 @@ def set-package-version [content: string, version: string] {
 }
 
 def set-tarball-hash [content: string, arch: string, sri_hash: string] {
-  let asset_line = $"asset = \"zed-linux-($arch).tar.gz\";"
+  let asset_line = $"asset = \"zed-linux-($arch).tar.zst\";"
   let parts = $content | split row $asset_line
   if (($parts | length) != 2) {
     error make $"Could not find source for ($arch)"

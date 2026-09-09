@@ -7,7 +7,6 @@
   fontconfig,
   glib,
   gnutar,
-  gzip,
   libxkbcommon,
   libx11,
   libxcb,
@@ -15,23 +14,24 @@
   openssl,
   vulkan-loader,
   wayland,
+  zstd,
 }:
 
 let
   version = "1.18.1";
   sources = {
     aarch64-linux = {
-      asset = "zed-linux-aarch64.tar.gz";
-      hash = "sha256-fuk7zRBZxPDXAFeMz6AK69pfxSHJQ/4/+/carEGggac=";
+      asset = "zed-linux-aarch64.tar.zst";
+      hash = "sha256-p+0Xr1vyD8+l2hUdDs2lJ5TK3lqQ02aNOUaKnq2Oukk=";
     };
     x86_64-linux = {
-      asset = "zed-linux-x86_64.tar.gz";
-      hash = "sha256-7qYiaNjsX9NYffBvp24HLBBMyl4LCwq+y8KK5bh8C60=";
+      asset = "zed-linux-x86_64.tar.zst";
+      hash = "sha256-ZN92qaE8YctFRWYCIhiCf90MMGotwbEI1k8VCHR8+Jw=";
     };
   };
   source = sources.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
   src = fetchurl {
-    url = "https://github.com/zed-industries/zed/releases/download/v${version}/${source.asset}";
+    url = "https://github.com/mert-kurttutan/zed-nix/releases/download/v${version}/${source.asset}";
     hash = source.hash;
   };
 
@@ -45,8 +45,8 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     autoPatchelfHook
     gnutar
-    gzip
     makeWrapper
+    zstd
   ];
   buildInputs = [
     alsa-lib
@@ -64,7 +64,7 @@ stdenv.mkDerivation {
   buildPhase = ''
     runHook preBuild
     mkdir -p build
-    tar -xzf $src -C build
+    tar --zstd -xf $src -C build
     runHook postBuild
   '';
 

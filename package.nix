@@ -18,15 +18,15 @@
 }:
 
 let
-  version = "1.25.3";
+  version = "1.26.2";
   sources = {
     aarch64-linux = {
       asset = "zed-linux-aarch64.tar.zst";
-      hash = "sha256-sdXKg5PnlRrcW6eNWgi/Bbi8hhUpVh0gbh3UGJG3tFw=";
+      hash = "sha256-QokBjVBsyjYgsrTmfifixAeFcfk+fs+mGkuBXAbI2qU=";
     };
     x86_64-linux = {
       asset = "zed-linux-x86_64.tar.zst";
-      hash = "sha256-+nZOdCFNw4+Z/2pW+t/Yl56qywfdDTEOaWaYd5wQvps=";
+      hash = "sha256-A3SXfnStuY8XFsUSVHCg4Q12bqtyuW24lnPMD1LQPI0=";
     };
   };
   source = sources.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
